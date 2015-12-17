@@ -11,6 +11,8 @@
 
         <!-- EPUBJS Renderer -->
         <script src="../build/epub.js"></script>
+        <script src="../takeshis_js/add_coment.js"></script>
+        <script src="../takeshis_js/get_contents.js"></script>
 
         <style type="text/css">
 
@@ -64,22 +66,37 @@
           .arrow:active {
             color: #000;
           }
+
+          /*div要素を横並びにしたい*/
+          /*
+          div {
+            float: left;
+          }*/
+
         </style>
 
          <script>
             "use strict";
 
-            var Book = ePub("https://s3.amazonaws.com/moby-dick/");
+            //var Book = ePub("https://s3.amazonaws.com/moby-dick/");
+            var Book = ePub("../books/206952/");
 
         </script>
     </head>
     <body>
+      <!--form-->
+        <div>
+          <textarea id="com_form" name="com" cols=40 rows=4>aaaa</textarea>
+        </div>
+          <input type="submit" value="コメント送信" onclick="get_com_date()">
+          <input type="submit" value="ハイライトの取得" onclick="get_contents_date()">
+      <!--/form-->
+          <div id="com_area"></div>
         <div id="main">
           <div id="prev" onclick="Book.prevPage();" class="arrow">‹</div>
           <div id="area"></div>
           <div id="next" onclick="Book.nextPage();" class="arrow">›</div>
         </div>
-
         <script>
 
             Book.renderTo("area");

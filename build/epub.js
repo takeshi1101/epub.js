@@ -4552,21 +4552,21 @@ EPUBJS.EpubCFI.prototype.isCfiString = function(target) {
 };
 
 EPUBJS.Events = function(obj, el){
-	
+
 	this.events = {};
-	
+
 	if(!el){
 		this.el = document.createElement('div');
 	}else{
 		this.el = el;
 	}
-	
+
 	obj.createEvent = this.createEvent;
 	obj.tell = this.tell;
 	obj.listen = this.listen;
 	obj.deafen = this.deafen;
 	obj.listenUntil = this.listenUntil;
-	
+
 	return this;
 };
 
@@ -4612,12 +4612,12 @@ EPUBJS.Events.prototype.deafen = function(evt, func){
 
 EPUBJS.Events.prototype.listenUntil = function(OnEvt, OffEvt, func, bindto){
 	this.listen(OnEvt, func, bindto);
-	
+
 	function unlisten(){
 		this.deafen(OnEvt, func);
 		this.deafen(OffEvt, unlisten);
 	}
-	
+
 	this.listen(OffEvt, unlisten, this);
 };
 EPUBJS.hooks = {};
@@ -5157,7 +5157,7 @@ EPUBJS.Pagination.prototype.process = function(pageList){
 		this.pages.push(item.page);
 		this.locations.push(item.cfi);
 	}, this);
-	
+
 	this.pageList = pageList;
 	this.firstPage = parseInt(this.pages[0]);
 	this.lastPage = parseInt(this.pages[this.pages.length-1]);
@@ -5166,12 +5166,12 @@ EPUBJS.Pagination.prototype.process = function(pageList){
 
 EPUBJS.Pagination.prototype.pageFromCfi = function(cfi){
 	var pg = -1;
-	
+
 	// Check if the pageList has not been set yet
 	if(this.locations.length === 0) {
 		return -1;
 	}
-	
+
 	// TODO: check if CFI is valid?
 
 	// check if the cfi is in the location list

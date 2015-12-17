@@ -23,7 +23,7 @@ body {
   left: 40px;
 }
 
-#next {  
+#next {
   right: 40px;
 }
 
@@ -44,7 +44,7 @@ body {
 .arrow:hover {
   color: #777;
 }
- 
+
 .arrow:active {
   color: #000;
 }
