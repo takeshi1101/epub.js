@@ -1,34 +1,12 @@
-#!/usr/bin/env node
-var connect = require('connect'),
-	colors = require('colors'),
-	argv = require('optimist').argv,
-	portfinder = require('portfinder');
-
-var port = argv.p,
-	logger = argv.l,
-	log = console.log;
-
-if (!argv.p) {
-	portfinder.basePort = 8080;
-	portfinder.getPort(function (err, port) {
-	if (err) throw err;
-	listen(port);
-	});
-} else {
-	listen(port);
-}
-
-
 // 1.モジュールオブジェクトの初期化
 var fs = require("fs");
-var server2 = require("http").createServer(function(req, res) {
+var server = require("http").createServer(function(req, res) {
      res.writeHead(200, {"Content-Type":"text/html"});
-     var output = fs.readFileSync("./basic.html", "utf-8");
+     var output = fs.readFileSync("./android-patch.html", "utf-8");
+     var output = fs.readFileSync("./index.html", "utf-8");
      res.end(output);
-}).listen(7000);
-
-
-var io = require("socket.io").listen(server2);
+}).listen(8080);
+var io = require("socket.io").listen(server);
 
 // ユーザ管理ハッシュ
 var userHash = {};
@@ -56,29 +34,4 @@ io.sockets.on("connection", function (socket) {
       io.sockets.emit("publish", {value: msg});
     }
   });
-});
-
-
-
-function listen(port) {
-
-	var server = connect();
-		server.use(connect.static(__dirname))
-
-		if(!logger) server.use(connect.logger(logger))
-
-		server.listen(port);
-
-	log('Starting up Server, serving '.yellow
-		+ __dirname.green
-		+ ' on port: '.yellow
-		+ port.toString().cyan);
-	log('Hit CTRL-C to stop the server');
-}
-
-
-
-process.on('SIGINT', function () {
-	log('http-server stopped.'.red);
-	process.exit();
 });

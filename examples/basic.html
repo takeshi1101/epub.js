@@ -10,9 +10,11 @@
 
 
         <!-- EPUBJS Renderer -->
-        <script src="../build/epub.js"></script>
-        <script src="../takeshis_js/add_coment.js"></script>
-        <script src="../takeshis_js/get_contents.js"></script>
+        <script src="../libs/build/epub.js"></script>
+        <script src="../libs/takeshis_js/add_coment.js"></script>
+        <script src="../libs/takeshis_js/get_contents.js"></script>
+
+        <script src="http://localhost:7000/socket.io/socket.io.js"></script>
 
         <style type="text/css">
 
@@ -76,9 +78,9 @@
         </style>
 
          <script>
-            "use strict";
+            //"use strict";
 
-            //var Book = ePub("https://s3.amazonaws.com/moby-dick/");
+            var Book = ePub("https://s3.amazonaws.com/moby-dick/");
             var Book = ePub("../books/206952/");
 
         </script>
@@ -92,15 +94,54 @@
           <input type="submit" value="ハイライトの取得" onclick="get_contents_date()">
       <!--/form-->
           <div id="com_area"></div>
-        <div id="main">
-          <div id="prev" onclick="Book.prevPage();" class="arrow">‹</div>
-          <div id="area"></div>
-          <div id="next" onclick="Book.nextPage();" class="arrow">›</div>
-        </div>
-        <script>
 
-            Book.renderTo("area");
+        <input type="text" id="msg_input" style="width:200px;" />
+    <button onclick="publishMessage();">語る</button>
+    <div id="msg"></div>
 
-        </script>
+    <script type="text/javascript">
+      // 1.イベントとコールバックの定義
+      var socketio = io.connect('http://localhost:7000');
+
+      socketio.on("connected", function(name) {});
+      socketio.on("publish", function (data) { addMessage(data.value); });
+      socketio.on("disconnect", function () {});
+
+      // 2.イベントに絡ませる関数の定義
+      function start(name) {
+        socketio.emit("connected", name);
+      }
+
+      function publishMessage() {
+        var textInput = document.getElementById('msg_input');
+        var msg = "[" + myName + "] " + textInput.value;
+        socketio.emit("publish", {value: msg});
+        textInput.value = '';
+      }
+
+      function addMessage (msg) {
+        var domMeg = document.createElement('div');
+        domMeg.innerHTML = new Date().toLocaleTimeString() + ' ' + msg;
+        msgArea.appendChild(domMeg);
+      }
+
+      // 3.開始処理
+      var msgArea = document.getElementById("msg");
+      var myName = Math.floor(Math.random()*100) + "さん";
+      addMessage("貴方は" + myName + "として入室しました");
+      start(myName);
+    </script>
+
+    <div id="main">
+      <div id="prev" onclick="Book.prevPage();" class="arrow">‹</div>
+      <div id="area"></div>
+      <div id="next" onclick="Book.nextPage();" class="arrow">›</div>
+    </div>
+    <script>
+
+        Book.renderTo("area");
+
+    </script>
+
     </body>
 </html>
