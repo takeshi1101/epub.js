@@ -1,0 +1,66 @@
+body {
+  overflow: hidden;
+}
+
+/*
+コンテンツ表示エリアの位置設定
+右側の矢印が切れる→ボタンで対応
+*/
+#main {
+  position: absolute;
+  top: 0;
+  left: 350px;
+  width: 75%;
+  height: 100%;
+}
+
+#area {
+  width: 80%;
+  height: 80%;
+  margin: 5% auto;
+  max-width: 1250px;
+}
+
+#area iframe {
+  border: none;
+}
+
+#prev {
+  left: 40px;
+}
+
+#next {
+  right: 40px;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  margin-top: -32px;
+  font-size: 64px;
+  color: #E2E2E2;
+  font-family: arial, sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.arrow:hover {
+  color: #777;
+}
+
+.arrow:active {
+  color: #000;
+}
+
+#msg {
+  width:350px;
+  height: 100vh;
+  overflow-y: auto;
+  /*
+  コメントがコンテンツに被らないための設定
+  */
+  word-break : break-all;
+}

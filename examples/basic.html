@@ -10,138 +10,132 @@
 
 
         <!-- EPUBJS Renderer -->
-        <script src="../libs/build/epub.js"></script>
-        <script src="../libs/takeshis_js/add_coment.js"></script>
-        <script src="../libs/takeshis_js/get_contents.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script src="../build/epub.js"></script>
+        <script src="../takeshis_js/add_coment.js"></script>
+        <script src="../takeshis_js/get_contents.js"></script>
+        <script src="../takeshis_js/save_coments_log.js"></script>
+
 
         <script src="http://localhost:7000/socket.io/socket.io.js"></script>
+        <!--学校のサーバ環境で実行する場合-->
+        <!--script src="http://zmac011.sfc.keio.ac.jp:7000/socket.io/socket.io.js"></script-->
+        <!--script src="../takeshis_js/chat.js"></script-->
 
-        <style type="text/css">
-
-          body {
-            overflow: hidden;
-          }
-
-          #main {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-          }
-
-          #area {
-            width: 80%;
-            height: 80%;
-            margin: 5% auto;
-            max-width: 1250px;
-          }
-
-          #area iframe {
-            border: none;
-          }
-
-          #prev {
-            left: 40px;
-          }
-
-          #next {
-            right: 40px;
-          }
-
-          .arrow {
-            position: absolute;
-            top: 50%;
-            margin-top: -32px;
-            font-size: 64px;
-            color: #E2E2E2;
-            font-family: arial, sans-serif;
-            font-weight: bold;
-            cursor: pointer;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-          }
-
-          .arrow:hover {
-            color: #777;
-          }
-
-          .arrow:active {
-            color: #000;
-          }
-
-          /*div要素を横並びにしたい*/
-          /*
-          div {
-            float: left;
-          }*/
-
-        </style>
+        <link rel="stylesheet" type="text/css" href="basic_html.css">
 
          <script>
             //"use strict";
 
-            var Book = ePub("https://s3.amazonaws.com/moby-dick/");
+            //var Book = ePub("https://s3.amazonaws.com/moby-dick/");
             var Book = ePub("../books/206952/");
 
         </script>
     </head>
-    <body>
-      <!--form-->
-        <div>
-          <textarea id="com_form" name="com" cols=40 rows=4>aaaa</textarea>
+    <body><!-- onload="attendance_list()"-->
+      <div class="left_div">
+        <input type="file" id="select_file" onchange="change_file()">
+      </div>
+        名前:<input type="text" id="name_form" name = "user_name" value="" placeholder="名前を入れてください" onchange="change_name();">
+      <div class="left_div">
+        <textarea id="com_form" name="com" cols=40 rows=4>aaaa</textarea>
+      </div>
+        <!--input type="submit" value="コメント送信" onclick="get_com_date()">
+        <input type="submit" value="ハイライトの取得" onclick="get_contents_date()"-->
+        <button onclick="publishMessage();">語る</button>
+        <button onclick="save();">コメントの保存</button>
+        <button onclick="showMember();">入室者</button>
+        <div id="member_area" class="left_div"></div>
+        <div id="msg" class="left_div"></div>
+        <script type="text/javascript">
+        // 1.イベントとコールバックの定義
+                var socketio = io.connect('http://localhost:7000');
+                //学校のサーバ環境で実行する場合
+                //var socketio = io.connect('http://zmac011.sfc.keio.ac.jp:7000');
+                var msg_num = 0;
+
+                socketio.on("connected", function(name) {});
+                socketio.on("publish", function (data) { addMessage(data.value); });
+                socketio.on("disconnect", function () {});
+                socketio.on("name_cahnge", function (old_name,new_name) {});
+                //socketio.on("attendance_list", function (member_list) { showMember(member_list.value);});
+                //socketio.on("attendance_list", function (member_list) { showMember(member_list.value);});
+                socketio.on("save", function(coments_log_date) {});
+
+                // 2.イベントに絡ませる関数の定義
+                function start(name) {
+                  socketio.emit("connected", name);
+                }
+
+                function publishMessage() {
+                  var textInput = document.getElementById('com_form');
+                  var highlight_date = get_contents_date();
+                  var msg = "";
+                  if(highlight_date){
+                    msg = "[" + myName + "] " + highlight_date + " > " + textInput.value;
+                  }else{
+                    msg = "[" + myName + "] "+ textInput.value;
+                  }
+                  socketio.emit("publish", {value: msg});
+                  textInput.value = '';
+                }
+
+                function addMessage (msg) {
+                  var domMeg = document.createElement('div');
+                  domMeg.innerHTML = new Date().toLocaleTimeString() + ' ' + msg;
+                  domMeg.id = "msg" + msg_num;
+                  msg_num++;
+                  sessionStorage.setItem("msg_num", msg_num);
+                  msgArea.appendChild(domMeg);
+                }
+
+                // 3.開始処理
+                var msgArea = document.getElementById("msg");
+                //var myName = Math.floor(Math.random()*100) + "さん";
+                var myName = "名無しさん";
+
+                function change_name(){
+                  //myNameをローカル変数のまま、テキストボックの値が変更されたら変更したい
+                  var newName = document.getElementById("name_form").value + "さん";
+                  socketio.emit("name_cahnge", myName,newName);
+                  myName = newName;
+                  //socketio.emit("attendance_list");
+                }
+
+                addMessage("貴方は" + myName + "として入室しました");
+                start(myName);
+
+                /*
+                function showMember(member_list){
+                  var member_area = document.getElementById("member_area");
+                  member_area.innerHTML = "入室者:"+member_list;
+                  socketio.emit("attendance_list",{value: member_list});
+                }
+                */
+
+                function change_file(){
+                  var select_file = document.getElementById("select_file");
+                  alert(select_file.value);//ブラウザによって取得できるデータが変わる
+
+                  Book = ePub("../books/"+select_file.value+"/");
+                }
+
+                function save(){
+                  var coments_log_date = save_coments_log();
+                  socketio.emit("save",coments_log_date);
+                }
+
+        </script>
+        <div id="main">
+          <!--div id="prev" onclick="Book.prevPage();" class="arrow">‹</div-->
+          <button onclick="Book.prevPage();">前のページへ</button>
+          <button onclick="Book.nextPage();">次のページへ</button>
+          <div id="area"></div>
+          <!--div id="next" onclick="Book.nextPage();" class="arrow">›</div-->
         </div>
-          <input type="submit" value="コメント送信" onclick="get_com_date()">
-          <input type="submit" value="ハイライトの取得" onclick="get_contents_date()">
-      <!--/form-->
-          <div id="com_area"></div>
 
-        <input type="text" id="msg_input" style="width:200px;" />
-    <button onclick="publishMessage();">語る</button>
-    <div id="msg"></div>
-
-    <script type="text/javascript">
-      // 1.イベントとコールバックの定義
-      var socketio = io.connect('http://localhost:7000');
-
-      socketio.on("connected", function(name) {});
-      socketio.on("publish", function (data) { addMessage(data.value); });
-      socketio.on("disconnect", function () {});
-
-      // 2.イベントに絡ませる関数の定義
-      function start(name) {
-        socketio.emit("connected", name);
-      }
-
-      function publishMessage() {
-        var textInput = document.getElementById('msg_input');
-        var msg = "[" + myName + "] " + textInput.value;
-        socketio.emit("publish", {value: msg});
-        textInput.value = '';
-      }
-
-      function addMessage (msg) {
-        var domMeg = document.createElement('div');
-        domMeg.innerHTML = new Date().toLocaleTimeString() + ' ' + msg;
-        msgArea.appendChild(domMeg);
-      }
-
-      // 3.開始処理
-      var msgArea = document.getElementById("msg");
-      var myName = Math.floor(Math.random()*100) + "さん";
-      addMessage("貴方は" + myName + "として入室しました");
-      start(myName);
-    </script>
-
-    <div id="main">
-      <div id="prev" onclick="Book.prevPage();" class="arrow">‹</div>
-      <div id="area"></div>
-      <div id="next" onclick="Book.nextPage();" class="arrow">›</div>
-    </div>
-    <script>
-
-        Book.renderTo("area");
-
-    </script>
-
-    </body>
+        <script>
+          Book.renderTo("area");
+        </script>
+      </body>
 </html>

@@ -36,6 +36,17 @@ var userHash = {};
 // 2.イベントの定義
 io.sockets.on("connection", function (socket) {
 
+	socket.on("save",function(coments_log_date){
+		/*
+		module.exports=function(req, res, next) {
+			fs.writeFileSync("/test.txt",req.query.text);
+			res.send("書き込みしました");
+		}
+		*/
+	  fs.writeFile("coments_log/hoge.txt", coments_log_date);
+
+	})
+
   // 接続開始カスタムイベント(接続元ユーザを保存し、他ユーザへ通知)
   socket.on("connected", function (name) {
     var msg = name + "が入室しました";
@@ -48,6 +59,23 @@ io.sockets.on("connection", function (socket) {
     io.sockets.emit("publish", {value:data.value});
   });
 
+	//名前が変更された時の処理
+	socket.on("name_cahnge",function(old_name,new_name){
+		var msg = old_name + "が" + new_name + "に変更されました。";
+    userHash[socket.id] = new_name;
+    io.sockets.emit("publish", {value: msg});
+	})
+	/*
+	//入室者一覧の取得
+	socket.on("attendance_list",function (member_list){
+		//io.sockets.emit("attendance_list", {value:member_list.value});
+		var members = "";
+		for(key in userHash){
+			 members = members + userHash[key] + ",";
+		}
+		io.sockets.emit("attendance_list", {value:members});
+	})
+*/
   // 接続終了組み込みイベント(接続元ユーザを削除し、他ユーザへ通知)
   socket.on("disconnect", function () {
     if (userHash[socket.id]) {
